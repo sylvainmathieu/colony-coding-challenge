@@ -27,7 +27,6 @@ const Navigation: React.FC = () => {
 
   const handleConnect = useCallback(async () => {
     const wallets = await onboard.connectWallet();
-    console.log(wallets)
 
     const [metamaskWallet] = wallets;
 

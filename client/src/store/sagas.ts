@@ -5,8 +5,9 @@ import apolloClient from '../apollo/client';
 import { Actions } from '../types';
 import { SaveTransaction } from '../queries';
 
-function* sendTransaction() {
-  const provider = new JsonRpcProvider('http://localhost:8545');
+function* sendTransaction({ payload }: any) {
+
+  const { sender, recipient, amount } = payload
 
   // this could have been passed along in a more elegant fashion,
   // but for the purpouses of this scenario it's good enough
@@ -15,18 +16,9 @@ function* sendTransaction() {
 
   const signer: Signer = yield walletProvider.getSigner();
 
-  const accounts: Array<{ address: string }> = yield provider.listAccounts();
-
-  const randomAddress = () => {
-    const min = 1;
-    const max = 19;
-    const random = Math.round(Math.random() * (max - min) + min);
-    return accounts[random].address;
-  };
-
   const transaction = {
-    to: randomAddress(),
-    value: 1000000000000000000,
+    to: recipient,
+    value: BigInt(parseFloat(amount) * 1e18), // Convert ETH to WEI
   };
 
   try {
@@ -38,7 +30,7 @@ function* sendTransaction() {
     const variables = {
       transaction: {
         gasLimit: (receipt.gasLimit && receipt.gasLimit.toString()) || '0',
-        gasPrice: (receipt.gasPrice && receipt.gasPrice.toString())|| '0',
+        gasPrice: (receipt.gasPrice && receipt.gasPrice.toString()) || '0',
         to: receipt.to,
         from: receipt.from,
         value: (receipt.value && receipt.value.toString()) || '',
@@ -54,7 +46,7 @@ function* sendTransaction() {
     });
 
   } catch (error) {
-    //
+    console.error(error)
   }
 
 }

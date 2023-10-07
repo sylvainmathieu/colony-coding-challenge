@@ -1,27 +1,55 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux'
 import { useForm } from "react-hook-form";
 
 import { Actions } from '../types';
+import { BrowserProvider, JsonRpcProvider, Signer } from 'ethers';
 
 const SendTransaction: React.FC = () => {
   const dispatch = useDispatch();
-  const { handleSubmit } = useForm();
 
-  const onSubmit = (data: any) => console.log(data);
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      sender: "",
+      recipient: "",
+      amount: undefined
+    }
+  });
 
-  const handleDispatch = useCallback(() => {
+  const [walletAccount, setWalletAccount] = useState<string>();
+  const [recipientAccounts, setRecipientAccounts] = useState<Array<{ address: string }>>([]);
+
+  useEffect(() => {
+    const getWalletAccount = async () => {
+      //@ts-ignore
+      const walletProvider = new BrowserProvider(window.web3.currentProvider);
+      const signer: Signer = await walletProvider.getSigner();
+      return signer.getAddress();
+    }
+    getWalletAccount().then((accounts) => setWalletAccount(() => accounts))
+  }, [])
+
+  useEffect(() => {
+    const getRecipientAccounts = async () => {
+      const provider = new JsonRpcProvider('http://localhost:8545');
+      return await provider.listAccounts();
+    }
+    getRecipientAccounts().then((accounts) => setRecipientAccounts(() => accounts))
+  }, [])
+
+  const handleDispatch = useCallback((data: any) => {
     dispatch({
       type: Actions.SendTransaction,
+      payload: data
     });
-  }, [dispatch]);
+  }, [dispatch, errors]);
 
   return (
     <>
       <button data-hs-overlay="#hs-basic-modal" type="button" className="py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">
         Send
       </button>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(handleDispatch)}>
         <div id="hs-basic-modal" className="hs-overlay hidden w-full h-full fixed top-0 left-0 z-[60] overflow-x-hidden overflow-y-auto bg-black bg-opacity-60">
           <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-100 transition-all w-full m-3 mx-auto flex flex-col h-full items-center justify-center">
             <div className="bg-white border shadow-sm rounded-xl w-modal">
@@ -39,17 +67,23 @@ const SendTransaction: React.FC = () => {
               <div className="p-4 overflow-y-auto">
                 <p className="mt-1 mb-6 text-gray-800">Send ETH to a wallet address</p>
                 <label htmlFor="input-sender" className="block text-sm font-bold my-2">Sender:</label>
-                <input type="text" id="input-sender" className="opacity-70 pointer-events-none py-3 px-4 block bg-gray-50 border-gray-800 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 w-full" placeholder="Sender Address (Autocompleted)" disabled />
+                <input type="text" className={`opacity-70 py-3 px-4 block bg-gray-50 border-gray-800 rounded-md text-sm w-full ${errors.sender ? "border-red-600 focus:ring-red-500 focus:border-red-500" : "focus:border-blue-500 focus:ring-blue-500"}`} disabled value={walletAccount ?? ""} />
+                {errors.sender && <p className="text-red-600 mt-1">{errors.sender?.message}</p>}
                 <label htmlFor="input-recipient" className="block text-sm font-bold my-2">Recipient:</label>
-                <input type="text" id="input-recipient" className="opacity-70 pointer-events-none py-3 px-4 block bg-gray-50 border-gray-800 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 w-full" placeholder="Recipient Address" disabled />
-                <label htmlFor="input-amount" className="block text-sm font-bold my-2">Amount:</label>
-                <input type="number" id="input-amount" className="opacity-70 pointer-events-none py-3 px-4 block bg-gray-50 border-gray-800 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 w-full" placeholder="Amount" disabled />
+                <select {...register("recipient", { required: "Required" })} className={`opacity-70 py-3 px-4 block bg-gray-50 border-gray-800 rounded-md text-sm w-full ${errors.recipient ? "border-red-600 focus:ring-red-500 focus:border-red-500" : "focus:border-blue-500 focus:ring-blue-500"}`}>
+                  <option>Recipient Address</option>
+                  {recipientAccounts?.map((account) => <option key={account.address}>{account.address}</option>)}
+                </select>
+                {errors.recipient && <p className="text-red-600 mt-1">{errors.recipient?.message}</p>}
+                <label htmlFor="input-amount" className="block text-sm font-bold my-2">Amount (ETH):</label>
+                <input {...register("amount", { required: "Required" })} type="number" step="0.01" id="input-amount" className={`opacity-70 py-3 px-4 block bg-gray-50 border-gray-800 rounded-md text-sm w-full ${errors.amount ? "border-red-600 focus:ring-red-500 focus:border-red-500 " : "focus:border-blue-500 focus:ring-blue-500"}`} placeholder="Amount" />
+                {errors.amount && <p className="text-red-600 mt-1">{errors.amount?.message}</p>}
               </div>
               <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t">
                 <button type="button" className="hs-dropdown-toggle py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border font-medium bg-white text-gray-700 shadow-sm align-middle hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 transition-all text-sm" data-hs-overlay="#hs-basic-modal">
                   Close
                 </button>
-                <button type="button" onClick={handleDispatch} className="py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">
+                <button type="submit" className="py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">
                   Send
                 </button>
               </div>
