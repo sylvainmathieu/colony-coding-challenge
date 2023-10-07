@@ -1,18 +1,25 @@
 import React, { useCallback, useState } from 'react';
 import Onboard, { WalletState } from '@web3-onboard/core'
-
 import SendTransaction from './SendTransaction';
 
+import injectedModule from '@web3-onboard/injected-wallets'
+const injected = injectedModule()
+
 const onboard = Onboard({
-  wallets: [],
+  wallets: [injected],
   chains: [
     {
-      id: '123456',
+      id: 1337,
       token: 'ETH',
       label: 'Local Ganache',
       rpcUrl: 'http://localhost:8545',
     },
-  ]
+  ],
+  appMetadata: {
+    name: 'My app',
+    description: 'Great app',
+    recommendedInjectedWallets: [{ name: 'MetaMask', url: 'https://metamask.io' }],
+  }
 })
 
 const Navigation: React.FC = () => {
@@ -20,6 +27,7 @@ const Navigation: React.FC = () => {
 
   const handleConnect = useCallback(async () => {
     const wallets = await onboard.connectWallet();
+    console.log(wallets)
 
     const [metamaskWallet] = wallets;
 
