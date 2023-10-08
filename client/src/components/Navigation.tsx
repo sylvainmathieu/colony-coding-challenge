@@ -30,7 +30,7 @@ const Navigation: React.FC = () => {
 
     const [metamaskWallet] = wallets;
 
-    if (metamaskWallet.label === 'MetaMask' && metamaskWallet.accounts[0].address) {
+    if (metamaskWallet && metamaskWallet.label === 'MetaMask' && metamaskWallet.accounts[0].address) {
       setWallet(metamaskWallet);
     }
   }, []);
