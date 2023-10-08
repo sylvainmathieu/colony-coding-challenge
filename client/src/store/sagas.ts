@@ -5,6 +5,7 @@ import apolloClient from '../apollo/client';
 import { Actions } from '../types';
 import { SaveTransaction } from '../queries';
 import { convertEthToWei } from '../utils/utils';
+import { navigate } from '../components/NaiveRouter';
 
 function* sendTransaction({ payload }: any) {
 
@@ -45,6 +46,9 @@ function* sendTransaction({ payload }: any) {
       mutation: SaveTransaction,
       variables,
     });
+
+    // The transaction was successful, so we navigate to the transaction page
+    navigate(`/transaction/${receipt.hash}`)
 
   } catch (error) {
     console.error(error)
