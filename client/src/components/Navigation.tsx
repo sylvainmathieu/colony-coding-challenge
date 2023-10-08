@@ -36,13 +36,13 @@ const Navigation: React.FC = () => {
   }, []);
 
   return (
-    <header className="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-ful text-sm py-4 bg-gray-800">
-      <nav className="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between">
+    <header className="flex flex-wrap md:justify-start md:flex-nowrap z-50 w-ful text-sm py-4 bg-gray-800">
+      <nav className="max-w-[85rem] w-full mx-auto px-4 flex items-center justify-between flex-col md:flex-row gap-2 md:gap-0">
         <div className="flex items-center justify-between">
           <a className="flex-none text-xl font-semibold dark:text-white" href=".">Transactions List</a>
         </div>
-        <div className="hs-collapse hidden overflow-hidden transition-all duration-300 basis-full grow sm:block">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:pl-5">
+        <div className="hs-collapse overflow-hidden transition-all duration-300 basis-full grow">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-end md:mt-0 md:pl-5">
             {wallet && (
               <>
                 <SendTransaction />
