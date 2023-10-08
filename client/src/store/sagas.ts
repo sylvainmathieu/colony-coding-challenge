@@ -4,10 +4,11 @@ import { JsonRpcProvider, Transaction, TransactionResponse, TransactionReceipt, 
 import apolloClient from '../apollo/client';
 import { Actions } from '../types';
 import { SaveTransaction } from '../queries';
+import { convertEthToWei } from '../utils/utils';
 
 function* sendTransaction({ payload }: any) {
 
-  const { sender, recipient, amount } = payload
+  const { recipient, amount } = payload
 
   // this could have been passed along in a more elegant fashion,
   // but for the purpouses of this scenario it's good enough
@@ -18,7 +19,7 @@ function* sendTransaction({ payload }: any) {
 
   const transaction = {
     to: recipient,
-    value: BigInt(parseFloat(amount) * 1e18), // Convert ETH to WEI
+    value: convertEthToWei(amount),
   };
 
   try {

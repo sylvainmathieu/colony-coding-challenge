@@ -1,4 +1,8 @@
-export function convertFromWeiToEth(value: string): number {
+export function convertEthToWei(value: number): string {
+    return (value * 10 ** 18).toString();
+}
+
+export function convertWeiToEth(value: string): number {
     return Number(value) / 10 ** 18;
 }
 
@@ -8,5 +12,5 @@ export function formatAmount(value: number): string {
 
 export function formatEth(value: string | undefined): string {
     if (!value) return "-"
-    return formatAmount(convertFromWeiToEth(value))
+    return formatAmount(convertWeiToEth(value))
 }

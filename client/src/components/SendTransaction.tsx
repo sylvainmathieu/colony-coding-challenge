@@ -75,7 +75,7 @@ const SendTransaction: React.FC = () => {
                 </select>
                 {errors.recipient && <p className="text-red-600 mt-1">{errors.recipient?.message}</p>}
                 <label htmlFor="input-amount" className="block text-sm font-bold my-2">Amount (ETH):</label>
-                <input {...register("amount", { required: "Required" })} type="number" step="0.01" id="input-amount" className={`opacity-70 py-3 px-4 block bg-gray-50 border-gray-800 rounded-md text-sm w-full ${errors.amount ? "border-red-600 focus:ring-red-500 focus:border-red-500 " : "focus:border-blue-500 focus:ring-blue-500"}`} placeholder="Amount" />
+                <input {...register("amount", { required: "Required" })} type="number" step="0.00001" id="input-amount" className={`opacity-70 py-3 px-4 block bg-gray-50 border-gray-800 rounded-md text-sm w-full ${errors.amount ? "border-red-600 focus:ring-red-500 focus:border-red-500 " : "focus:border-blue-500 focus:ring-blue-500"}`} placeholder="Amount" />
                 {errors.amount && <p className="text-red-600 mt-1">{errors.amount?.message}</p>}
               </div>
               <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t">
