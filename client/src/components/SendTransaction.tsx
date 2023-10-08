@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux'
 import { useForm } from "react-hook-form";
 
 import { Actions } from '../types';
-import { BrowserProvider, JsonRpcProvider, Signer } from 'ethers';
+import { useWalletAccount } from '../hooks/useWalletAccount';
+import { useRecipientAccounts } from '../hooks/useRecipientAccounts';
 
 const SendTransaction: React.FC = () => {
   const dispatch = useDispatch();
@@ -16,27 +17,17 @@ const SendTransaction: React.FC = () => {
     }
   });
 
-  const [walletAccount, setWalletAccount] = useState<string>();
-  const [recipientAccounts, setRecipientAccounts] = useState<Array<{ address: string }>>([]);
+  // Handle the modal's state here rather than using tailwind's control flow, so we can close the modal after dispatching the action
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    const getWalletAccount = async () => {
-      //@ts-ignore
-      const walletProvider = new BrowserProvider(window.web3.currentProvider);
-      const signer: Signer = await walletProvider.getSigner();
-      return signer.getAddress();
-    }
-    getWalletAccount().then((accounts) => setWalletAccount(accounts))
-  }, [])
+  // Since the injected wallet is already connected, we can just get the signer from it.
+  // This will improve the UX as the user won't have to enter it.
+  // The sender's address won't be editable.
+  const walletAccount = useWalletAccount();
 
-  useEffect(() => {
-    const getRecipientAccounts = async () => {
-      const provider = new JsonRpcProvider('http://localhost:8545');
-      return await provider.listAccounts();
-    }
-    getRecipientAccounts().then((accounts) => setRecipientAccounts(() => accounts))
-  }, [])
+  // Retrieve the list of valid accounts so we can use a dropdown to select the recipient.
+  // This improves the UX in the context of this exercise.
+  const recipientAccounts = useRecipientAccounts();
 
   const handleDispatch = useCallback((data: any) => {
     dispatch({
