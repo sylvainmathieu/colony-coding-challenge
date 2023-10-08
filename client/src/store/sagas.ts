@@ -3,7 +3,7 @@ import { JsonRpcProvider, Transaction, TransactionResponse, TransactionReceipt, 
 
 import apolloClient from '../apollo/client';
 import { Actions } from '../types';
-import { SaveTransaction } from '../queries';
+import { GetAllTransactions, SaveTransaction } from '../queries';
 import { convertEthToWei } from '../utils/utils';
 import { navigate } from '../components/NaiveRouter';
 
@@ -45,6 +45,7 @@ function* sendTransaction({ payload }: any) {
     yield apolloClient.mutate({
       mutation: SaveTransaction,
       variables,
+      refetchQueries: [{ query: GetAllTransactions }],
     });
 
     // The transaction was successful, so we navigate to the transaction page
